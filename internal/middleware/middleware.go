@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"log"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -58,5 +60,32 @@ func RequireAuth(jwtSecret string) fiber.Handler {
 
 		c.Locals("userID", userID)
 		return c.Next()
+	}
+}
+func SetupLogger() fiber.Handler {
+	return func(c fiber.Ctx) error {
+		start := time.Now()
+
+		// Log incoming request
+		log.Printf("\n→ %s %s\n  Headers: %v\n  Body: %s",
+			c.Method(),
+			c.OriginalURL(),
+			c.GetReqHeaders()["Authorization"],
+			string(c.Body()),
+		)
+
+		// Process request
+		err := c.Next()
+
+		// Log outgoing response
+		log.Printf("← %s %s | %d | %s\n  Body: %s",
+			c.Method(),
+			c.OriginalURL(),
+			c.Response().StatusCode(),
+			time.Since(start),
+			string(c.Response().Body()),
+		)
+
+		return err
 	}
 }

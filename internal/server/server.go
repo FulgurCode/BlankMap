@@ -44,6 +44,7 @@ func (s *WebServer) Shutdown(ctx context.Context) error {
 
 func (s *WebServer) SetupMiddleware() {
 	s.App.Use(middleware.SetupCORS())
+	s.App.Use(middleware.SetupLogger())
 }
 
 func New(cfg *config.Config) *WebServer {
