@@ -35,7 +35,7 @@ func main() {
 	cfg := config.Load()
 
 	var s = server.New(cfg)
-	// s.RegisterRoutes()
+	s.RegisterRoutes()
 
 	go gracefulShutDown(s)
 	if err := s.App.Listen(":"+cfg.Port, fiber.ListenConfig{EnablePrefork: cfg.PreFork}); err != nil {
