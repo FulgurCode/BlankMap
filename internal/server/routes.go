@@ -8,7 +8,7 @@ import (
 
 func (s *WebServer) RegisterRoutes() {
 	authHandler := handlers.NewAuthHandler(s.DB.Queries, s.Config.JWTSecret)
-	// blankMapHandler := handlers.NewBlankMapHandler(s.DB.Queries)
+	blankMapHandler := handlers.NewBlankMapHandler(s.DB.Queries)
 	// pinHandler := handlers.NewPinHandler(s.DB.Queries)
 	// feedbackHandler := handlers.NewFeedbackHandler(s.DB.Queries)
 
@@ -25,11 +25,11 @@ func (s *WebServer) RegisterRoutes() {
 	api.Get("/auth/me", authHandler.Me)
 
 	// Blank Maps
-	// api.Post("/blank-maps", blankMapHandler.CreateBlankMap)
-	// api.Get("/blank-maps", blankMapHandler.GetBlankMaps)
-	// api.Get("/blank-maps/:id", blankMapHandler.GetBlankMapByID)
-	// api.Put("/blank-maps/:id", blankMapHandler.UpdateBlankMap)
-	// api.Delete("/blank-maps/:id", blankMapHandler.DeleteBlankMap)
+	api.Post("/blank-maps", blankMapHandler.CreateBlankMap)
+	api.Get("/blank-maps", blankMapHandler.GetBlankMaps)
+	api.Get("/blank-maps/:id", blankMapHandler.GetBlankMapByID)
+	api.Put("/blank-maps/:id", blankMapHandler.UpdateBlankMap)
+	api.Delete("/blank-maps/:id", blankMapHandler.DeleteBlankMap)
 
 	// // Pins
 	// // GET /pins?blank_map_id=<uuid>  — filter by map
