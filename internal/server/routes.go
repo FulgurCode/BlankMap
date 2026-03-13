@@ -9,7 +9,7 @@ import (
 func (s *WebServer) RegisterRoutes() {
 	authHandler := handlers.NewAuthHandler(s.DB.Queries, s.Config.JWTSecret)
 	blankMapHandler := handlers.NewBlankMapHandler(s.DB.Queries)
-	// pinHandler := handlers.NewPinHandler(s.DB.Queries)
+	pinHandler := handlers.NewPinHandler(s.DB.Queries)
 	// feedbackHandler := handlers.NewFeedbackHandler(s.DB.Queries)
 
 	s.App.Get("/", s.handleIndex)
@@ -31,15 +31,15 @@ func (s *WebServer) RegisterRoutes() {
 	api.Put("/blank-maps/:id", blankMapHandler.UpdateBlankMap)
 	api.Delete("/blank-maps/:id", blankMapHandler.DeleteBlankMap)
 
-	// // Pins
-	// // GET /pins?blank_map_id=<uuid>  — filter by map
-	// // GET /pins/nearby?lat=&lng=&radius=  — proximity search
-	// api.Post("/pins", pinHandler.CreatePin)
-	// api.Get("/pins", pinHandler.GetPins)
-	// api.Get("/pins/nearby", pinHandler.GetPinsNearby)
-	// api.Get("/pins/:id", pinHandler.GetPinByID)
-	// api.Put("/pins/:id", pinHandler.UpdatePin)
-	// api.Delete("/pins/:id", pinHandler.DeletePin)
+	// Pins
+	// GET /pins?blank_map_id=<uuid>  — filter by map
+	// GET /pins/nearby?lat=&lng=&radius=  — proximity search
+	api.Post("/pins", pinHandler.CreatePin)
+	api.Get("/pins", pinHandler.GetPins)
+	api.Get("/pins/nearby", pinHandler.GetPinsNearby)
+	api.Get("/pins/:id", pinHandler.GetPinByID)
+	api.Put("/pins/:id", pinHandler.UpdatePin)
+	api.Delete("/pins/:id", pinHandler.DeletePin)
 
 	// // Feedback
 	// api.Post("/feedback", feedbackHandler.CreateFeedback)
