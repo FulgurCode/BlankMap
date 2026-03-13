@@ -10,7 +10,7 @@ func (s *WebServer) RegisterRoutes() {
 	authHandler := handlers.NewAuthHandler(s.DB.Queries, s.Config.JWTSecret)
 	blankMapHandler := handlers.NewBlankMapHandler(s.DB.Queries)
 	pinHandler := handlers.NewPinHandler(s.DB.Queries)
-	// feedbackHandler := handlers.NewFeedbackHandler(s.DB.Queries)
+	feedbackHandler := handlers.NewFeedbackHandler(s.DB.Queries)
 
 	s.App.Get("/", s.handleIndex)
 
@@ -42,10 +42,10 @@ func (s *WebServer) RegisterRoutes() {
 	api.Delete("/pins/:id", pinHandler.DeletePin)
 
 	// // Feedback
-	// api.Post("/feedback", feedbackHandler.CreateFeedback)
-	// api.Get("/pins/:pinID/feedback", feedbackHandler.GetFeedbackByPin)
-	// api.Put("/feedback/:id", feedbackHandler.UpdateFeedback)
-	// api.Delete("/feedback/:id", feedbackHandler.DeleteFeedback)
+	api.Post("/feedback", feedbackHandler.CreateFeedback)
+	api.Get("/pins/:pinID/feedback", feedbackHandler.GetFeedbackByPin)
+	api.Put("/feedback/:id", feedbackHandler.UpdateFeedback)
+	api.Delete("/feedback/:id", feedbackHandler.DeleteFeedback)
 }
 
 func (s *WebServer) handleIndex(c fiber.Ctx) error {
