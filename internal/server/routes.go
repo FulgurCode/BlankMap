@@ -30,6 +30,7 @@ func (s *WebServer) RegisterRoutes() {
 	api.Get("/blank-maps/:id", blankMapHandler.GetBlankMapByID)
 	api.Put("/blank-maps/:id", blankMapHandler.UpdateBlankMap)
 	api.Delete("/blank-maps/:id", blankMapHandler.DeleteBlankMap)
+	api.Get("/blank-maps/count/:id", blankMapHandler.GetPinCount)
 
 	// Pins
 	// GET /pins?blank_map_id=<uuid>  — filter by map
@@ -46,6 +47,7 @@ func (s *WebServer) RegisterRoutes() {
 	api.Get("/pins/:pinID/feedback", feedbackHandler.GetFeedbackByPin)
 	api.Put("/feedback/:id", feedbackHandler.UpdateFeedback)
 	api.Delete("/feedback/:id", feedbackHandler.DeleteFeedback)
+	api.Get("/pins/:pinID/rating", feedbackHandler.GetPinRating)
 }
 
 func (s *WebServer) handleIndex(c fiber.Ctx) error {

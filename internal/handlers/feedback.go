@@ -120,3 +120,21 @@ func (h *FeedbackHandler) DeleteFeedback(c fiber.Ctx) error {
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
+
+func (h *FeedbackHandler) GetPinRating(c fiber.Ctx) error {
+	pinID, err := uuid.Parse(c.Params("pinID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid pin_id",
+		})
+	}
+
+	feedback, err := h.queries.GetPinRating(c.Context(), pinID)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to fetch feedback",
+		})
+	}
+
+	return c.JSON(feedback)
+}

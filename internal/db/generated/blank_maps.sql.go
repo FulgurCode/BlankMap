@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createBlankMap = `-- name: CreateBlankMap :one
@@ -56,19 +57,36 @@ func (q *Queries) DeleteBlankMap(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllBlankMaps = `-- name: GetAllBlankMaps :many
-SELECT id, name, description, icon, created_at, created_by, updated_at, updated_by FROM blank_maps
-ORDER BY name
+SELECT 
+  bm.id, bm.name, bm.description, bm.icon, bm.created_at, bm.created_by, bm.updated_at, bm.updated_by,
+  COUNT(p.id) AS pin_count
+FROM blank_maps bm
+LEFT JOIN pins p ON p.blank_map_id = bm.id
+GROUP BY bm.id
+ORDER BY bm.name
 `
 
-func (q *Queries) GetAllBlankMaps(ctx context.Context) ([]BlankMap, error) {
+type GetAllBlankMapsRow struct {
+	ID          uuid.UUID          `json:"id"`
+	Name        string             `json:"name"`
+	Description *string            `json:"description"`
+	Icon        *string            `json:"icon"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CreatedBy   uuid.UUID          `json:"created_by"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy   uuid.UUID          `json:"updated_by"`
+	PinCount    int64              `json:"pin_count"`
+}
+
+func (q *Queries) GetAllBlankMaps(ctx context.Context) ([]GetAllBlankMapsRow, error) {
 	rows, err := q.db.Query(ctx, getAllBlankMaps)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []BlankMap
+	var items []GetAllBlankMapsRow
 	for rows.Next() {
-		var i BlankMap
+		var i GetAllBlankMapsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -78,6 +96,7 @@ func (q *Queries) GetAllBlankMaps(ctx context.Context) ([]BlankMap, error) {
 			&i.CreatedBy,
 			&i.UpdatedAt,
 			&i.UpdatedBy,
+			&i.PinCount,
 		); err != nil {
 			return nil, err
 		}
@@ -90,13 +109,30 @@ func (q *Queries) GetAllBlankMaps(ctx context.Context) ([]BlankMap, error) {
 }
 
 const getBlankMapByID = `-- name: GetBlankMapByID :one
-SELECT id, name, description, icon, created_at, created_by, updated_at, updated_by FROM blank_maps
-WHERE id = $1
+SELECT 
+  bm.id, bm.name, bm.description, bm.icon, bm.created_at, bm.created_by, bm.updated_at, bm.updated_by,
+  COUNT(p.id) AS pin_count
+FROM blank_maps bm
+LEFT JOIN pins p ON p.blank_map_id = bm.id
+WHERE bm.id = $1
+GROUP BY bm.id
 `
 
-func (q *Queries) GetBlankMapByID(ctx context.Context, id uuid.UUID) (BlankMap, error) {
+type GetBlankMapByIDRow struct {
+	ID          uuid.UUID          `json:"id"`
+	Name        string             `json:"name"`
+	Description *string            `json:"description"`
+	Icon        *string            `json:"icon"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CreatedBy   uuid.UUID          `json:"created_by"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy   uuid.UUID          `json:"updated_by"`
+	PinCount    int64              `json:"pin_count"`
+}
+
+func (q *Queries) GetBlankMapByID(ctx context.Context, id uuid.UUID) (GetBlankMapByIDRow, error) {
 	row := q.db.QueryRow(ctx, getBlankMapByID, id)
-	var i BlankMap
+	var i GetBlankMapByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -106,8 +142,20 @@ func (q *Queries) GetBlankMapByID(ctx context.Context, id uuid.UUID) (BlankMap, 
 		&i.CreatedBy,
 		&i.UpdatedAt,
 		&i.UpdatedBy,
+		&i.PinCount,
 	)
 	return i, err
+}
+
+const getNoOfPins = `-- name: GetNoOfPins :one
+SELECT COUNT(*) FROM pins WHERE blank_map_id = $1
+`
+
+func (q *Queries) GetNoOfPins(ctx context.Context, blankMapID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getNoOfPins, blankMapID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const updateBlankMap = `-- name: UpdateBlankMap :one

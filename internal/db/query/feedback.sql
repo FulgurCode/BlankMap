@@ -16,6 +16,14 @@ ORDER BY f.created_at DESC;
 SELECT * FROM feedback
 WHERE id = $1;
 
+-- name: GetPinRating :one
+SELECT
+    COUNT(rating)::INT          AS total_reviews,
+    FLOOR(AVG(rating))::INT     AS average_rating
+FROM feedback
+WHERE pin_id = $1
+  AND rating IS NOT NULL;
+
 -- name: UpdateFeedback :one
 UPDATE feedback
 SET rating = $2, review = $3, updated_at = NOW()

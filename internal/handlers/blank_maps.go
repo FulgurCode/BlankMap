@@ -122,3 +122,19 @@ func (h *BlankMapHandler) DeleteBlankMap(c fiber.Ctx) error {
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
+
+func (h *BlankMapHandler) GetPinCount(c fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+
+	count, err := h.queries.GetNoOfPins(c.Context(), id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "blank map not found",
+		})
+	}
+
+	return c.JSON(count)
+}

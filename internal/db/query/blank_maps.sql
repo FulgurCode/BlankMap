@@ -4,12 +4,22 @@ VALUES ($1, $2, $3, $4, $4)
 RETURNING *;
 
 -- name: GetAllBlankMaps :many
-SELECT * FROM blank_maps
-ORDER BY name;
+SELECT 
+  bm.*,
+  COUNT(p.id) AS pin_count
+FROM blank_maps bm
+LEFT JOIN pins p ON p.blank_map_id = bm.id
+GROUP BY bm.id
+ORDER BY bm.name;
 
 -- name: GetBlankMapByID :one
-SELECT * FROM blank_maps
-WHERE id = $1;
+SELECT 
+  bm.*,
+  COUNT(p.id) AS pin_count
+FROM blank_maps bm
+LEFT JOIN pins p ON p.blank_map_id = bm.id
+WHERE bm.id = $1
+GROUP BY bm.id;
 
 -- name: UpdateBlankMap :one
 UPDATE blank_maps
@@ -20,3 +30,6 @@ RETURNING *;
 -- name: DeleteBlankMap :exec
 DELETE FROM blank_maps
 WHERE id = $1;
+
+-- name: GetNoOfPins :one
+SELECT COUNT(*) FROM pins WHERE blank_map_id = $1;

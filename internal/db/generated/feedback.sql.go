@@ -125,6 +125,27 @@ func (q *Queries) GetFeedbackByPinID(ctx context.Context, pinID uuid.UUID) ([]Ge
 	return items, nil
 }
 
+const getPinRating = `-- name: GetPinRating :one
+SELECT
+    COUNT(rating)::INT          AS total_reviews,
+    FLOOR(AVG(rating))::INT     AS average_rating
+FROM feedback
+WHERE pin_id = $1
+  AND rating IS NOT NULL
+`
+
+type GetPinRatingRow struct {
+	TotalReviews  int32 `json:"total_reviews"`
+	AverageRating int32 `json:"average_rating"`
+}
+
+func (q *Queries) GetPinRating(ctx context.Context, pinID uuid.UUID) (GetPinRatingRow, error) {
+	row := q.db.QueryRow(ctx, getPinRating, pinID)
+	var i GetPinRatingRow
+	err := row.Scan(&i.TotalReviews, &i.AverageRating)
+	return i, err
+}
+
 const updateFeedback = `-- name: UpdateFeedback :one
 UPDATE feedback
 SET rating = $2, review = $3, updated_at = NOW()
