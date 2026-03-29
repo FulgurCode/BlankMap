@@ -63,7 +63,7 @@ SELECT
 FROM blank_maps bm
 LEFT JOIN pins p ON p.blank_map_id = bm.id
 GROUP BY bm.id
-ORDER BY bm.name
+ORDER BY pin_count DESC
 `
 
 type GetAllBlankMapsRow struct {
